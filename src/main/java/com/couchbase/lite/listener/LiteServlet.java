@@ -52,13 +52,27 @@ public class LiteServlet extends HttpServlet {
     @Override
     public void service(HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-
-        if (request != null)
-            Log.i(Log.TAG_LISTENER, "[REQUEST] (%s) %s: %s",
-                    Thread.currentThread().getName(),
-                    request.getMethod(),
-                    getFullURL(request));
-
+		
+		// Handle OPTIONS Request in order to respond to CORS
+		String origin = request.getHeader("origin");
+		Log.d(Log.TAG_LISTENER, "Request from origin: " + origin);
+		
+		String domain = origin.replaceAll(".*\\.(?=.*\\.)", "");
+		
+		if (domain.endsWith("zestdataservices.com") || domain.endsWith("zestdataservice.com")) {
+			Log.d(Log.TAG_LISTENER, "Allow domain: " + domain);
+			response.setHeader("Access-Control-Allow-Origin", domain);
+		}
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+		response.setHeader("Access-Control-Allow-Headers", "content-type, accept, cookie, ZestAppName, ZestSessionId");
+		if("OPTIONS".equals(request.getMethod())){
+			Log.v(Log.TAG_LISTENER, "Handle OPTIONS Request in order to respond to CORS");
+			response.setStatus(200);
+			return;
+		}
+		allowedCredentials = null; //Disable Auth
+		
         Credentials requestCredentials = credentialsWithBasicAuthentication(request);
 
         if (allowedCredentials != null && !allowedCredentials.empty()) {
@@ -226,16 +240,5 @@ public class LiteServlet extends HttpServlet {
             }
         }
         return null;
-    }
-
-    public static String getFullURL(HttpServletRequest request) {
-        StringBuffer requestURL = request.getRequestURL();
-        String queryString = request.getQueryString();
-
-        if (queryString == null) {
-            return requestURL.toString();
-        } else {
-            return requestURL.append('?').append(queryString).toString();
-        }
     }
 }
