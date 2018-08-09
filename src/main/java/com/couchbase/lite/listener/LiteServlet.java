@@ -55,14 +55,14 @@ public class LiteServlet extends HttpServlet {
 		
 		// Handle OPTIONS Request in order to respond to CORS
 		String origin = request.getHeader("origin");
-		Log.d(Log.TAG_LISTENER, "Request from origin: " + origin);
-		
-		String domain = origin.replaceAll(".*\\.(?=.*\\.)", "");
-		
-		if (domain.endsWith("zestdataservices.com") || domain.endsWith("zestdataservice.com")) {
-			Log.d(Log.TAG_LISTENER, "Allow domain: " + domain);
-			response.setHeader("Access-Control-Allow-Origin", domain);
-		}
+		if(origin != null && !origin.isEmpty()) {
+            Log.d(Log.TAG_LISTENER, "Request from origin: " + origin);
+            String domain = origin.replaceAll(".*\\.(?=.*\\.)", "");
+            if (domain.endsWith("zestdataservices.com") || domain.endsWith("zestdataservice.com")) {
+                Log.d(Log.TAG_LISTENER, "Allow domain: " + domain);
+                response.setHeader("Access-Control-Allow-Origin", domain);
+            }
+        }
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
 		response.setHeader("Access-Control-Allow-Headers", "content-type, accept, cookie, ZestAppName, ZestSessionId");
